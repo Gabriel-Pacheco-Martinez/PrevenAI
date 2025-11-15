@@ -1,45 +1,5 @@
 [
   {
-    "prompt": "What are some effective strategies to improve my daily nutrition?",
-    "response": "A balanced diet includes a variety of vegetables, fruits, whole grains, lean proteins, and healthy fats. Staying hydrated, limiting processed foods, and practicing portion control can further support overall health.",
-    "topic": "nutrition"
-  },
-  {
-    "prompt": "How often should I engage in physical exercise each week?",
-    "response": "Adults are generally advised to aim for at least 150 minutes of moderate-intensity exercise or 75 minutes of vigorous-intensity activity per week, complemented by muscle-strengthening activities twice weekly.",
-    "topic": "exercise"
-  },
-  {
-    "prompt": "What are some techniques to manage stress effectively?",
-    "response": "Mindfulness meditation, deep-breathing exercises, journaling, and regular physical activity can help reduce stress. Consistent sleep patterns and social support are also beneficial.",
-    "topic": "mental health"
-  },
-  {
-    "prompt": "How can I improve my sleep quality naturally?",
-    "response": "Maintain a consistent sleep schedule, create a dark and quiet bedroom, limit screen time before bed, avoid caffeine late in the day, and engage in relaxing pre-sleep routines like reading or light stretching.",
-    "topic": "sleep"
-  },
-  {
-    "prompt": "What are some daily hydration tips?",
-    "response": "Drink water regularly throughout the day, aim for 6–8 cups depending on activity level, and include water-rich foods like fruits and vegetables. Limit sugary drinks and excessive caffeine.",
-    "topic": "hydration"
-  },
-  {
-    "prompt": "Which vaccinations should adults consider for general preventative health?",
-    "response": "Common adult vaccinations include flu, tetanus-diphtheria, shingles, HPV (if applicable), and COVID-19 boosters. Recommendations vary by age, health status, and local guidelines.",
-    "topic": "vaccinations"
-  },
-  {
-    "prompt": "How can I ergonomically set up my home workspace?",
-    "response": "Ensure your monitor is at eye level, use a supportive chair, keep feet flat on the floor, position your keyboard and mouse for neutral wrist alignment, and take frequent movement breaks.",
-    "topic": "ergonomics"
-  },
-  {
-    "prompt": "What are some general wellness tips to maintain overall health?",
-    "response": "Balance nutrition, regular physical activity, adequate sleep, stress management, hydration, and regular health check-ups. Cultivate social connections and engage in activities you enjoy.",
-    "topic": "wellness tips"
-  },
-  {
     "prompt": "How can I track and improve my physical activity at home?",
     "response": "Use wearable devices, mobile apps, or simple logs to track steps, workouts, and intensity. Set realistic goals, vary activities to avoid plateaus, and gradually increase duration or intensity.",
     "topic": "exercise"
