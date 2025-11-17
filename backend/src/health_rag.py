@@ -7,21 +7,26 @@ Qwen2.5-7b + LoRA adapter for domain-specific QA
 # General
 import os
 import torch
+import time
 
 # Huggingface
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
+from transformers import TextStreamer
+
 
 # LangChain
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import (
     PyPDFLoader, Docx2txtLoader, UnstructuredPowerPointLoader, TextLoader
 )
 
 
-class HealthRag:
+class HealthRAG:
+
     # =======
     # Initialize RAG system: only once
     # =======
@@ -35,13 +40,18 @@ class HealthRag:
         # Load base LLM with LoRA adapter
         base_model = AutoModelForCausalLM.from_pretrained(
             base_model_hf,
-            device_map="auto",
-            torch_dtype=torch.float16
+            # offload_folder="./offload",
+            torch_dtype=torch.float16,
+            device_map="mps"
         )
         print(f"[✓] 1.- Loaded base model correctly")
 
         # Wrap base model with LoRA adapter weights
-        self.peft_model = PeftModel.from_pretrained(base_model, lora_repo)
+        self.peft_model = PeftModel.from_pretrained(
+            base_model, 
+            lora_repo,
+            subfolder="qwen_lora_adapter"
+        )
         self.peft_model.eval()
         print(f"[✓] 2.- Loaded LoRA adapter correctly")
 
@@ -58,12 +68,16 @@ class HealthRag:
         print(f"[✓] 4.- Chunked documents")
 
         # Load embedder
-        self.embedder = SentenceTransformer("BAAI/bge-small-en-v1.5")
+        self.embedder = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
 
         # Store vectors in FAISS
         if os.path.exists(faiss_path):
             print("    ↳ Loading existing FAISS folder and index...")
-            self.faiss_db = FAISS.load_local(faiss_path, self.embedder)
+            self.faiss_db = FAISS.load_local(
+                faiss_path, 
+                self.embedder,
+                allow_dangerous_deserialization=True
+                )
         else:
             print("    ↳ Creating new FAISS folder and index...")
             texts = [c.page_content for c in chunks]
@@ -110,33 +124,40 @@ class HealthRag:
     # RAG QUERY FUNCTION
     # ============================================
     def ask_enhanced_llm(self, query, k=5):
-        # Retrieve relevant chunks
+        print("[1] Running FAISS similarity search...")
         docs = self.faiss_db.similarity_search(query, k=k)
+
+        print("[2] Formatting context + prompt...")
         context = "\n\n".join([d.page_content for d in docs])
 
-        # Build input prompt
         prompt = f"""
-You are a preventative health assistant. Use ONLY the provided context.
-Give general, safe wellness advice.
+    You are a preventative health assistant. Use ONLY the provided context.
+    Give general, safe wellness advice.
 
-Context:
-{context}
+    Context:
+    {context}
 
-User:
-{query}
+    User:
+    {query}
 
-Answer:
-"""
+    Answer:
+    """
+        print("[3] Tokenizing prompt...")
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.peft_model.device)
 
-        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+        print(f"[4] Calling model.generate() with {inputs['input_ids'].shape[1]} input tokens...")
+        start = time.time()
 
-        output = self.model.generate(
+        output = self.peft_model.generate(
             **inputs,
             max_new_tokens=300,
             temperature=0.3,
-            do_sample=True
+            do_sample=True,
+            streamer=TextStreamer(self.tokenizer)
         )
 
+        print(f"[5] Generation completed in {time.time() - start:.2f} seconds.")
+        print("[6] Decoding output...")
+
         response = self.tokenizer.decode(output[0], skip_special_tokens=True)
-        # Remove the prompt from the output
         return response.split("Answer:")[-1].strip()

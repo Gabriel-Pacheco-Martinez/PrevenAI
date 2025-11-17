@@ -1,7 +1,7 @@
-from src.health_rag import PreventativeHealthRAG
+from src.health_rag import HealthRAG
 
 if __name__ == "__main__":
-    rag = PreventativeHealthRAG()
+    rag = HealthRAG()
 
-    answer = rag.ask("Please give me information on a plan for health prevention and wellness")
+    answer = rag.ask_enhanced_llm("Please give me information on a plan for health prevention and wellness")
     print(answer)
